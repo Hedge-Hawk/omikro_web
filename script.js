@@ -9,7 +9,7 @@ if (wordmark && !reducedMotion.matches) {
 
   const scramble = () => {
     const startedAt = performance.now();
-    const duration = 850;
+    const duration = 1100;
 
     const renderFrame = (now) => {
       const progress = Math.min((now - startedAt) / duration, 1);
@@ -25,11 +25,13 @@ if (wordmark && !reducedMotion.matches) {
       }
 
       wordmark.textContent = word;
-      window.setTimeout(scramble, 2400);
+      // Calm cadence: a rare, brief scramble instead of the original
+      // near-constant flicker.
+      window.setTimeout(scramble, 9000 + Math.random() * 6000);
     };
 
     requestAnimationFrame(renderFrame);
   };
 
-  window.setTimeout(scramble, 900);
+  window.setTimeout(scramble, 2500);
 }

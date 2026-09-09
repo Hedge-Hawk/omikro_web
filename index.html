@@ -11,16 +11,21 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <canvas
+      id="pond"
+      data-pond-mode="background"
+      aria-label="Interaktiver Hintergrund: Zeigerbewegungen zeichnen Stroemungen."
+    >
+      Dein Browser kann das Canvas-Element nicht darstellen.
+    </canvas>
+
     <main class="screen">
       <h1 class="wordmark" aria-label="Omikro">
-        <span aria-hidden="true" data-wordmark="Omikro">Omikro</span>
+        <span class="wordmark-text" aria-hidden="true" data-wordmark="Omikro">Omikro</span>
       </h1>
     </main>
 
-    <nav class="enter" aria-label="Experiences">
-      <a href="pond.html">pond &rarr;</a>
-    </nav>
-
+    <script src="pond.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

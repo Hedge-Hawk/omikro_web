@@ -23,5 +23,5 @@ wird mit `Ctrl+C` beendet.
 
 ## Routen
 
-- `/` — Startseite mit Omikro-Schriftzug
-- `/pond.html` — interaktive Pond-Experience (Wellen per Zeiger, Wogen per Klick)
+- `/` — Startseite mit Omikro-Schriftzug und interaktivem Pond-Hintergrund
+  (GPU-Stroemungen per Zeiger, Wellenringe per Klick/Tap)
