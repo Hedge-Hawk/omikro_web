@@ -1,0 +1,47 @@
+:root {
+  color-scheme: dark;
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  background: #000;
+  color: #fff;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100svh;
+  overflow: hidden;
+  background: #000;
+}
+
+.screen {
+  display: grid;
+  min-height: 100svh;
+  padding: 1rem;
+  place-items: center;
+}
+
+.wordmark {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.75rem, 13vw, 11rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-rendering: geometricPrecision;
+  white-space: nowrap;
+}
+
+::selection {
+  background: #fff;
+  color: #000;
+}
