@@ -1,0 +1,80 @@
+:root {
+  color-scheme: dark;
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  background: #000;
+  color: #fff;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+#pond {
+  position: fixed;
+  inset: 0;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.pond-ui {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pond-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+}
+
+.pond-top a {
+  pointer-events: auto;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+
+.pond-top a:hover {
+  color: #fff;
+}
+
+.pond-title {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hint {
+  bottom: 1.1rem;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.45);
+  transition: opacity 0.8s ease;
+}
+
+.hint.is-hidden {
+  opacity: 0;
+}
+
+::selection {
+  background: #fff;
+  color: #000;
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Omikro Pond - eine interaktive Wasser-Experience. Bewegen erzeugt Wellen, Klicken erzeugt Wogen."
+    >
+    <title>Omikro — Pond</title>
+    <link rel="stylesheet" href="pond.css">
+  </head>
+  <body>
+    <canvas id="pond" aria-label="Interaktiver Teich: Zeigerbewegungen erzeugen Wellen, Klicks erzeugen Wogen.">
+      Dein Browser kann das Canvas-Element nicht darstellen.
+    </canvas>
+
+    <header class="pond-ui pond-top">
+      <a href="index.html">← omikro</a>
+      <span class="pond-title">pond</span>
+    </header>
+
+    <p class="pond-ui hint" data-hint>bewegen = wellen &middot; klicken = woge</p>
+
+    <script src="pond.js"></script>
+  </body>
+</html>

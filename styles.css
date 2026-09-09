@@ -45,3 +45,22 @@ body {
   background: #fff;
   color: #000;
 }
+
+.enter {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.enter a {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-decoration: none;
+}
+
+.enter a:hover {
+  color: #fff;
+}
