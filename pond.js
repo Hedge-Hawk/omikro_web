@@ -15,7 +15,6 @@
         pointerInk: 0.5,
         burst: 0.42,
         seed: 0.18,
-        ambient: 0.022,
         ripple: 0.55,
       }
     : {
@@ -24,7 +23,6 @@
         pointerInk: 0.8,
         burst: 0.68,
         seed: 0.3,
-        ambient: 0.04,
         ripple: 1,
       };
 
@@ -104,6 +102,7 @@
       uniform float uAspect;
       uniform float uTime;
       uniform float uDt;
+      uniform float uFade;
       uniform vec4 uSplats[${MAX_SPLATS}];
       uniform float uStrengths[${MAX_SPLATS}];
       uniform float uInks[${MAX_SPLATS}];
@@ -156,13 +155,14 @@
           velocity += vec2(-delta.y / uAspect, delta.x) * reach * strength * 0.075;
         }
 
-        // Trails melt away continuously and are exactly zero by ~20 s:
-        // exponential falloff (0.9952^60 ≈ 0.75 per second) for the smooth
-        // visible fade, plus a tiny linear drain that cuts the asymptotic
-        // tail so no faint residue can survive past second 20.
-        float decay = pow(0.9952, uDt * 60.0);
-        density = max(density * decay - 0.0001 * uDt * 60.0, 0.0);
-        velocity *= pow(0.958, uDt * 60.0);
+        // Trails melt away continuously and reach exactly zero:
+        // exponential falloff for the smooth visible fade, plus a tiny
+        // linear drain that cuts the asymptotic tail. Both run on uFade
+        // (real elapsed time), so the screen is guaranteed clean ~20 s
+        // after the last input, whatever the frame rate.
+        float decay = pow(0.9952, uFade);
+        density = max(density * decay - 0.0001 * uFade, 0.0);
+        velocity *= pow(0.958, uFade);
         velocity = clamp(velocity, vec2(-MAX_VELOCITY), vec2(MAX_VELOCITY));
 
         gl_FragColor = vec4(
@@ -262,6 +262,7 @@
       aspect: gl.getUniformLocation(updateProgram, "uAspect"),
       time: gl.getUniformLocation(updateProgram, "uTime"),
       dt: gl.getUniformLocation(updateProgram, "uDt"),
+      fade: gl.getUniformLocation(updateProgram, "uFade"),
       splats: gl.getUniformLocation(updateProgram, "uSplats[0]"),
       strengths: gl.getUniformLocation(updateProgram, "uStrengths[0]"),
       inks: gl.getUniformLocation(updateProgram, "uInks[0]"),
@@ -342,7 +343,7 @@
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
-    function render(frameSplats, dt, time) {
+    function render(frameSplats, dt, fade, time) {
       if (!targets.length || gl.isContextLost()) return;
 
       splatData.fill(0);
@@ -371,6 +372,7 @@
       gl.uniform1f(updateUniforms.aspect, viewW / viewH);
       gl.uniform1f(updateUniforms.time, time);
       gl.uniform1f(updateUniforms.dt, dt);
+      gl.uniform1f(updateUniforms.fade, fade);
       gl.uniform4fv(updateUniforms.splats, splatData);
       gl.uniform1fv(updateUniforms.strengths, strengthData);
       gl.uniform1fv(updateUniforms.inks, inkData);
@@ -408,7 +410,7 @@
       particles.length = 0;
     }
 
-    function render(frameSplats, dt, time) {
+    function render(frameSplats, dt, fade, time) {
       ctx.save();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = "rgba(17, 28, 24, 0.065)";
@@ -438,7 +440,7 @@
         particle.y += particle.vy * dt;
         particle.vx *= 0.985;
         particle.vy *= 0.985;
-        particle.life -= dt * 0.13;
+        particle.life -= (fade / 60) * 0.13;
 
         const alpha = Math.max(0, particle.life) * particle.ink * settings.presence * 0.48;
         ctx.strokeStyle = `rgba(80, 148, 117, ${alpha})`;
@@ -560,6 +562,15 @@
       const dy = y - pointer.lastY;
       const elapsed = Math.max(8, time - pointer.lastTime) / 1000;
       const distance = Math.hypot(dx, dy);
+      if (distance < 2) {
+        // Micro-jitter (resting hand, sensor noise): track the position
+        // but deposit no ink, otherwise a resting cursor grows a dot
+        // that never fades.
+        pointer.lastX = x;
+        pointer.lastY = y;
+        pointer.lastTime = time;
+        return;
+      }
       const steps = Math.max(1, Math.min(12, Math.ceil(distance / 9)));
       const vx = (dx / viewW) / elapsed;
       const vy = (-dy / viewH) / elapsed;
@@ -647,7 +658,6 @@
   let running = true;
   let animationFrame = 0;
   let last = performance.now();
-  let nextAmbient = last / 1000 + 3.5;
   let measuredFrames = 0;
   let measuredTime = 0;
   let qualityAdjusted = false;
@@ -660,25 +670,16 @@
     animationFrame = 0;
     if (!running || !renderer) return;
 
-    const dt = Math.min(Math.max((now - last) / 1000, 0.001), 0.034);
+    const rawDt = (now - last) / 1000;
+    const dt = Math.min(Math.max(rawDt, 0.001), 0.034);
     last = now;
     const time = now / 1000;
-
-    if (time >= nextAmbient) {
-      const angle = -0.5 + Math.random();
-      queueSplat(
-        0.18 + Math.random() * 0.64,
-        0.2 + Math.random() * 0.6,
-        Math.cos(angle) * 0.015,
-        Math.sin(angle) * 0.015,
-        settings.ambient,
-        settings.ambient,
-      );
-      nextAmbient = time + 4 + Math.random() * 3;
-    }
+    // Fade runs on real elapsed time (not the stability-clamped dt),
+    // so trails always vanish on a wall-clock schedule.
+    const fade = Math.min(Math.max(rawDt, 0), 0.25) * 60;
 
     updateRipples(time);
-    renderer.render(splats.splice(0, MAX_SPLATS), dt, time);
+    renderer.render(splats.splice(0, MAX_SPLATS), dt, fade, time);
 
     if (renderer.isGpu && !qualityAdjusted) {
       measuredFrames++;
